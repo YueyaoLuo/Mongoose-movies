@@ -67,6 +67,13 @@
           <td><%= r.rating %></td>
           <td>
             <% if (user?._id.equals(r.user)) { %>
+              <a href="/reviews/<%= r._id %>/edit">
+                Edit Review
+              </a>
+            <% } %>
+          </td>
+          <td>
+            <% if (user?._id.equals(r.user)) { %>
               <form action="/reviews/<%= r._id %>?_method=DELETE" method="POST">
                 <button type="submit">X</button>
               </form>

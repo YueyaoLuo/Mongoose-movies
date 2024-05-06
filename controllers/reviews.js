@@ -3,7 +3,9 @@ const Movie = require('../models/movie');
 module.exports = {
   create,
   // Add this export
-  delete: deleteReview
+  delete: deleteReview,
+  edit,
+  update,
 };
 
 async function deleteReview(req, res) {
@@ -36,4 +38,38 @@ async function create(req, res) {
     console.log(err);
   }
   res.redirect(`/movies/${movie._id}`);
+}
+
+async function edit(req, res){
+  const movie = await Movie.findOne({ 'reviews._id': req.params.id, 'reviews.user': req.user._id });
+  // Rogue user!
+  if (!movie) return res.redirect('/movies');
+
+  const review = movie.reviews.find(function (item){
+    return item._id.toString() === req.params.id;
+
+  });
+  console.log(review)
+
+  // Save the updated movie doc
+  await movie.save();
+  // Redirect back to the movie's show view
+  res.render('reviews/edit', {title: 'Edit Review', review});
+}
+
+
+async function update(req, res) {
+ 
+  try{
+    const movie = await Movie.findOne({ 'reviews._id': req.params.id, 'reviews.user': req.user._id });
+    const reviewIndex = movie.reviews.findIndex(review => review._id.equals(req.params.id));
+    if (reviewIndex === -1) return res.redirect('/movies')
+    movie.reviews[reviewIndex].content = req.body.content;
+    movie.reviews[reviewIndex].rating = req.body.rating;  
+    await movie.save()
+    console.log(movie)
+    res.redirect(`/movies/${movie._id}`)
+}catch (err) {
+  console.log(err);
+}
 }
